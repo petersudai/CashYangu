@@ -3,28 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CashYangu - Users</title>
+    <title>CashYangu - Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        .users-container {
-            max-width: 800px;
+        .form-container {
+            max-width: 400px;
             margin: 50px auto;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .users-container h2 {
+        .form-container h2 {
             text-align: center;
             margin-bottom: 20px;
         }
-        .users-container ul {
-            list-style: none;
-            padding: 0;
-        }
-        .users-container li {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
+        .form-container .btn {
+            width: 100%;
         }
     </style>
 </head>
@@ -45,13 +40,25 @@
         <button class="mobile-nav-toggle"><i class="fas fa-bars"></i></button>
     </header>
 
-    <div class="users-container">
-        <h2>Registered Users</h2>
-        <ul>
-            {% for user in users %}
-                <li>{{ user.username }} - {{ user.email }}</li>
-            {% endfor %}
-        </ul>
+    <div class="form-container">
+        <h2>Login</h2>
+        <form action="{{ url_for('login') }}" method="POST" id="loginForm">
+            {{ form.hidden_tag() }}
+            <label for="email">Email:</label>
+            {{ form.email(size=32) }}
+            <label for="password">Password:</label>
+            {{ form.password(size=32) }}
+            <button type="submit" class="btn">Login</button>
+        </form>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
     </div>
 
     <footer class="footer">

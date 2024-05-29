@@ -4,23 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CashYangu - Financial Tracker</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script defer src="script.js"></script> <!-- Add this line -->
+    <script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
 </head>
 <body>
     <header class="header">
         <div class="logo">
-            <img src="path-to-your-logo.svg" alt="CashYangu Logo">
+            <img src="{{ url_for('static', filename = 'images/CashYangulogo.png') }}" alt="CashYangu Logo" width="150" height="130">
         </div>
         <nav class="navigation">
             <ul>
                 <li><a href="#products">Products</a></li>
                 <li><a href="#resources">Resources</a></li>
                 <li><a href="#get-a-demo">Get a Demo</a></li>
-                <li><a href="#contact">Contact</a></li>
-                <li><a href="#login">Log in</a></li>
-                <li><a href="#sign-up" class="btn">Sign Up</a></li>
+                <li><a href="{{ url_for('login') }}">Log in</a></li>
+                <li><a href="{{ url_for('register') }}" class="btn">Sign Up</a></li>
             </ul>
         </nav>
         <button class="mobile-nav-toggle"><i class="fas fa-bars"></i></button>
@@ -30,10 +29,10 @@
         <div class="hero-content">
             <h1>Track Your Finances Effectively</h1>
             <p>Effortless tracking for all your expenses, budgets, and savings.</p>
-            <a href="#sign-up" class="btn">Start Tracking Free</a>
+            <a href="{{ url_for('register') }}" class="btn">Start Tracking Free</a>
         </div>
         <div class="hero-image">
-            <img src="path-to-hero-image.svg" alt="Hero Image">
+            <img src="{{ url_for('static', filename = 'images/moneycount.jpeg') }}" alt="Hero Image">
         </div>
     </section>
 
@@ -81,20 +80,7 @@
 
     <section id="get-started" class="get-started">
         <h2>Get Started Today</h2>
-        <a href="#sign-up" class="btn">Create Account</a>
-    </section>
-
-     <section id="sign-up" class="sign-up">
-        <h2>Register</h2>
-        <form id="registerForm">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-            <button type="submit" class="btn">Sign Up</button>
-        </form>
+        <a href="{{ url_for('register') }}" class="btn">Create Account</a>
     </section>
 
     <footer class="footer">
@@ -102,4 +88,3 @@
     </footer>
 </body>
 </html>
-

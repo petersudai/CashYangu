@@ -52,3 +52,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+function togglePassword() {
+    var password = document.getElementById("password");
+    var confirmPassword = document.getElementById("confirm_password");
+    if (password.type === "password") {
+        password.type = "text";
+        if (confirmPassword) {
+            confirmPassword.type = "text";
+        }
+    } else {
+        password.type = "password";
+        if (confirmPassword) {
+            confirmPassword.type = "password";
+        }
+    }
+}
