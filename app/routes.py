@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, jsonify, s
 from flask_login import login_user, current_user, logout_user, login_required
 from app import app, db, bcrypt
 from app.forms import RegistrationForm, LoginForm
-from app.models import User, Event
+from app.models import User, Event, FinancialData
 from datetime import datetime
 
 @app.route("/")
@@ -49,6 +49,21 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+@app.route("/profile")
+@login_required
+def profile():
+    return render_template('profile.html')
+
+@app.route("/reports")
+@login_required
+def reports():
+    return render_template('reports.html')
+
+@app.route("/support")
+@login_required
+def support():
+    return render_template('support.html')
+
 @app.route("/users")
 @login_required
 def users():
@@ -94,3 +109,49 @@ def delete_event(event_id):
         db.session.commit()
         return jsonify({'message': 'Event deleted successfully'})
     return jsonify({'message': 'Event not found or unauthorized'}), 404
+
+# Fetch financial data
+@app.route('/api/financial', methods=['GET', 'POST'])
+@login_required
+def manage_financial_data():
+    if request.method == 'GET':
+        user_id = current_user.id
+        data = FinancialData.query.filter_by(user_id=user_id).all()
+
+        # Calculate totals and handle cases with no data
+        earnings = sum(item.amount for item in data if item.type == 'earnings')
+        expenses = sum(item.amount for item in data if item.type == 'expenses')
+        savings = sum(item.amount for item in data if item.type == 'savings')
+        budget_goals = sum(item.amount for item in data if item.type == 'budgetGoals')
+
+        # Handle target values safely
+        earnings_target = max((item.target for item in data if item.type == 'earnings' and item.target is not None), default=0)
+        expenses_target = max((item.target for item in data if item.type == 'expenses' and item.target is not None), default=0)
+        savings_target = max((item.target for item in data if item.type == 'savings' and item.target is not None), default=0)
+        budget_goals_target = max((item.target for item in data if item.type == 'budgetGoals' and item.target is not None), default=0)
+        
+        return jsonify({
+            'earnings': earnings,
+            'expenses': expenses,
+            'savings': savings,
+            'budgetGoals': budget_goals,
+            'earningsTarget': earnings_target,
+            'expensesTarget': expenses_target,
+            'savingsTarget': savings_target,
+            'budgetGoalsTarget': budget_goals_target
+        })
+
+    if request.method == 'POST':
+        data = request.get_json()
+        financial_data = FinancialData(
+            user_id=current_user.id,
+            type=data['type'],
+            amount=data['amount'],
+            date=datetime.strptime(data['date'], '%Y-%m-%dT%H:%M:%S') if 'date' in data else datetime.now(),
+            target=data.get('target')
+        )
+
+        db.session.add(financial_data)
+        db.session.commit()
+
+        return jsonify({'message': 'Financial data added successfully'}), 201

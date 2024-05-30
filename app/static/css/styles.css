@@ -238,6 +238,14 @@ body {
     font-weight: bold;
 }
 
+.header .navigation .btn2 {
+    background-color: #ffefb0;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: #000;
+    font-weight: bold;
+}
+
 /* Form Card Styles */
 form {
     max-width: 400px;
@@ -322,54 +330,78 @@ form button {
     border-radius: 8px;
 }
 
-/* .fc-toolbar {
+/* Ensure the .overview section is styled properly */
+.overview {
+    text-align: center;
+    /* margin: 20px 0; */
+}
+
+/* Style the stats */
+.stats {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
     margin-bottom: 20px;
 }
 
-.fc-header-toolbar {
-    background-color: #f2f2f2;
-    border-radius: 10px;
+.stat {
+    flex: 1;
+    min-width: 150px;
+    margin: 10px;
     padding: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
 }
 
-.fc button {
-    background-color: #f2f2f2;
-    color: #000000;
-    border: none;
-    border-radius: 5px;
+/* Style the forms */
+.form-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.stat-form {
+    margin: 10px;
+}
+
+/* form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+} */
+
+form input {
+    margin-bottom: 10px;
+    padding: 5px;
+    width: 80%;
+    box-sizing: border-box;
+}
+
+form button {
     padding: 5px 10px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
-.fc button:hover {
-    background-color: #f2db7f;
+.actual {
+    font-size: 1.5em;
 }
 
-.fc-prev-button, .fc-next-button, .fc-today-button {
-    margin: 0 10px;
-}
-
-.fc-content {
-    background-color: #f2db7f;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.target {
+    font-size: 1em;
     color: black;
 }
 
-.fc-day-header {
-    background-color: #f2f2f2;
-    border: none;
-    color: #333;
+/* Adjust form layout for smaller screens */
+@media (max-width: 768px) {
+    .stats, .form-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat, .stat-form {
+        width: 80%;
+    }
 }
 
-.fc-day, .fc-event {
-    background-color: #f2f2f2;
-    border: none;
-    color: #000000;
-}
 
-.fc-event {
-    border-radius: 5px;
-} */
