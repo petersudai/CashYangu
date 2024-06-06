@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}CashYangu{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/darkmode.css') }}" id="dark-mode-style">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     {% block head %}{% endblock %}
 </head>
@@ -15,17 +16,31 @@
         </div>
         <nav class="navigation">
             <ul>
+                {% if current_user.is_authenticated %}
+                <li>Welcome, {{ current_user.username.capitalize() }}</li> 
                 <li><a href="{{ url_for('dashboard') }}" class="btn2">Dashboard</a></li>
                 <li><a href="{{ url_for('reports') }}" class="btn2">Reports</a></li>
                 <li><a href="{{ url_for('profile') }}" class="btn2">Profile</a></li>
-                <li><a href="{{ url_for('support') }}" class="btn2">Support</a></li>
+                <li><a href="{{ url_for('resources') }}" class="btn2">Resources</a></li>
                 <li><a href="{{ url_for('logout') }}" class="btn">Log Out</a></li>
+                {% else %}
+                <li><a href="{{ url_for('login') }}">Log in</a></li>
+                <li><a href="{{ url_for('register') }}" class="btn">Sign Up</a></li>
+                {% endif %}
             </ul>
+            <!-- <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="checkbox">
+                    <input type="checkbox" id="checkbox" >
+                    <div class="slider round"></div>
+                </label>
+                <em>Enable Dark Mode!</em>
+            </div> -->
         </nav>
     </header>
 
     <main class="content">
         {% block content %}{% endblock %}
+        <script src="{{ url_for('static', filename='js/darkmode.js') }}"></script>
     </main>
 
     <footer class="footer">

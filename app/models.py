@@ -31,7 +31,8 @@ class FinancialData(db.Model):
     type = db.Column(db.String(50), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow)
-    target = db.Column(db.Float, nullable=True)
+    category = db.Column(db.String(50), nullable=True)
+
     
     user = db.relationship('User', back_populates='financial_data')
  

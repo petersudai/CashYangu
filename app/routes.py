@@ -1,4 +1,6 @@
-from flask import render_template, url_for, flash, redirect, request, jsonify, session
+import csv, requests
+from io import BytesIO, TextIOWrapper
+from flask import render_template, url_for, flash, redirect, request, jsonify, session, make_response, send_file
 from flask_login import login_user, current_user, logout_user, login_required
 from app import app, db, bcrypt
 from app.forms import RegistrationForm, LoginForm
@@ -57,12 +59,31 @@ def profile():
 @app.route("/reports")
 @login_required
 def reports():
-    return render_template('reports.html')
+    user_id = current_user.id
+    data = FinancialData.query.filter_by(user_id=user_id).all()
+    return render_template('reports.html', data=data)
 
-@app.route("/support")
+@app.route("/download_report")
 @login_required
-def support():
-    return render_template('support.html')
+def download_report():
+    user_id = current_user.id
+    data = FinancialData.query.filter_by(user_id=user_id).all()
+
+    output = BytesIO()
+    writer = csv.writer(output, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(["Date", "Type", "Amount", "Category"])
+
+    for item in data:
+        writer.writerow([item.date, item.type, item.amount, item.category or ''])
+
+    output.seek(0)
+    
+    return send_file(output, download_name="financial_report.csv", as_attachment=True, mimetype='text/csv')
+
+@app.route("/resources")
+@login_required
+def resources_page():
+    return render_template('resources.html')
 
 @app.route("/users")
 @login_required
@@ -116,42 +137,200 @@ def delete_event(event_id):
 def manage_financial_data():
     if request.method == 'GET':
         user_id = current_user.id
-        data = FinancialData.query.filter_by(user_id=user_id).all()
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+        data = FinancialData.query.filter_by(user_id=user_id).filter(
+            db.extract('month', FinancialData.date) == current_month,
+            db.extract('year', FinancialData.date) == current_year
+        ).all()
 
-        # Calculate totals and handle cases with no data
         earnings = sum(item.amount for item in data if item.type == 'earnings')
         expenses = sum(item.amount for item in data if item.type == 'expenses')
         savings = sum(item.amount for item in data if item.type == 'savings')
         budget_goals = sum(item.amount for item in data if item.type == 'budgetGoals')
 
-        # Handle target values safely
-        earnings_target = max((item.target for item in data if item.type == 'earnings' and item.target is not None), default=0)
-        expenses_target = max((item.target for item in data if item.type == 'expenses' and item.target is not None), default=0)
-        savings_target = max((item.target for item in data if item.type == 'savings' and item.target is not None), default=0)
-        budget_goals_target = max((item.target for item in data if item.type == 'budgetGoals' and item.target is not None), default=0)
-        
-        return jsonify({
-            'earnings': earnings,
-            'expenses': expenses,
-            'savings': savings,
-            'budgetGoals': budget_goals,
-            'earningsTarget': earnings_target,
-            'expensesTarget': expenses_target,
-            'savingsTarget': savings_target,
-            'budgetGoalsTarget': budget_goals_target
-        })
+        # Calculate available balance
+        available_balance = earnings - expenses
+
+        # Calculate expenses by category
+        expense_categories = {}
+        for item in data:
+            if item.type == 'expenses':
+                if item.category not in expense_categories:
+                    expense_categories[item.category] = 0
+                expense_categories[item.category] += item.amount
+
+        # Ensure all values are properly formatted and not None
+        response_data = {
+            'earnings': earnings or 0,
+            'expenses': expenses or 0,
+            'savings': savings or 0,
+            'budgetGoals': budget_goals or 0,
+            'availableBalance': available_balance or 0,
+            'expenseCategories': {k: v or 0 for k, v in expense_categories.items()}
+        }
+
+        return jsonify(response_data)
 
     if request.method == 'POST':
         data = request.get_json()
-        financial_data = FinancialData(
-            user_id=current_user.id,
-            type=data['type'],
-            amount=data['amount'],
-            date=datetime.strptime(data['date'], '%Y-%m-%dT%H:%M:%S') if 'date' in data else datetime.now(),
-            target=data.get('target')
-        )
+        user_id = current_user.id
 
-        db.session.add(financial_data)
+        # Ensure the amount is not None and is a number
+        amount = data.get('amount')
+        if amount is None or not isinstance(amount, (int, float)):
+            return jsonify({'message': 'Invalid amount'}), 400
+
+        # Determine the financial type and category
+        financial_type = data.get('type')
+        category = data.get('category')
+
+        if amount < 0:
+            # Handle negative values by adjusting the existing amount
+            existing_record = FinancialData.query.filter_by(user_id=user_id, type=financial_type, category=category).first()
+            if existing_record:
+                existing_record.amount += amount
+                if existing_record.amount < 0:
+                    existing_record.amount = 0  # Prevent negative totals
+            else:
+                return jsonify({'message': 'No existing record to adjust'}), 400
+        else:
+            # Handle positive values normally
+            existing_record = FinancialData.query.filter_by(user_id=user_id, type=financial_type, category=category).first()
+            if existing_record:
+                existing_record.amount += amount
+            else:
+                financial_data = FinancialData(
+                    user_id=user_id,
+                    type=financial_type,
+                    amount=amount,
+                    date=datetime.strptime(data['date'], '%Y-%m-%dT%H:%M:%S') if 'date' in data else datetime.now(),
+                    category=category
+                )
+                db.session.add(financial_data)
+
         db.session.commit()
 
-        return jsonify({'message': 'Financial data added successfully'}), 201
+        return jsonify({'message': 'Financial data added/adjusted successfully'}), 201
+
+
+@app.route('/api/financial_report', methods=['GET'])
+@login_required
+def get_detailed_financial_data():
+    user_id = current_user.id
+    data = FinancialData.query.filter_by(user_id=user_id).all()
+    financial_data = [
+        {
+            'date': item.date.isoformat(),
+            'type': item.type,
+            'amount': item.amount,
+            'category': item.category
+        }
+        for item in data
+    ]
+    return jsonify(financial_data)
+
+
+@app.route('/api/expenses', methods=['POST'])
+@login_required
+def add_expense():
+    data = request.get_json()
+    expense = FinancialData(
+        user_id=current_user.id,
+        type='expenses',
+        amount=data['amount'],
+        category=data['category'],
+        date=datetime.now()
+    )
+
+    db.session.add(expense)
+    db.session.commit()
+
+    return jsonify({'message': 'Expense added successfully'}), 201
+
+# @app.route('/api/expenses/report', methods=['GET'])
+# @login_required
+# def generate_expense_report():
+#     user_id = current_user.id
+#     expenses = FinancialData.query.filter_by(user_id=user_id, type='expenses').all()
+
+#     output = []
+#     for expense in expenses:
+#         output.append({
+#             'Date': expense.date.strftime('%Y-%m-%d'),
+#             'Category': expense.category,
+#             'Amount': expense.amount
+#         })
+
+#     si = StringIO()
+#     writer = csv.DictWriter(si, fieldnames=['Date', 'Category', 'Amount'])
+#     writer.writeheader()
+#     writer.writerows(output)
+
+#     response = make_response(si.getvalue())
+#     response.headers['Content-Disposition'] = 'attachment; filename=expense_report.csv'
+#     response.headers['Content-type'] = 'text/csv'
+#     return response
+
+# Articles API
+API_KEY = '44fe38a257d34ca887e4c2bf26a2bc76'
+API_URL = 'https://newsapi.org/v2/everything?q=finance&apiKey=' + API_KEY
+
+@app.route("/api/articles", methods=['GET'])
+def get_articles():
+    try:
+        response = requests.get(API_URL)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        articles = response.json().get('articles', [])
+
+        financial_articles = [
+            {
+                'title': article['title'],
+                'content': article['description'] if article['description'] else article['content'],
+                'imageUrl': article.get('urlToImage', 'default-image-url'),  # Fallback image URL if not available
+                'url': article['url']
+            }
+            for article in articles
+            if 'finance' in article['title'].lower() or 'finance' in article['description'].lower()
+            or 'financial' in article['title'].lower() or 'financial' in article['description'].lower()
+            or 'investment' in article['title'].lower() or 'investment' in article['description'].lower()
+            or 'saving' in article['title'].lower() or 'saving' in article['description'].lower()
+            or 'budget' in article['title'].lower() or 'budget' in article['description'].lower()
+        ]
+        return jsonify(financial_articles)
+    except requests.exceptions.RequestException as e:
+        print(f'Error fetching articles: {e}')
+        return jsonify({'error': 'Failed to fetch articles'}), 500
+
+@app.route("/resources")
+def resources():
+    return render_template('resources.html')
+
+@app.route('/api/financial/<int:id>', methods=['DELETE'])
+@login_required
+def delete_financial_data(id):
+    user_id = current_user.id
+    financial_data = FinancialData.query.filter_by(id=id, user_id=user_id).first()
+
+    if not financial_data:
+        return jsonify({'message': 'Financial data not found'}), 404
+
+    db.session.delete(financial_data)
+    db.session.commit()
+
+    return jsonify({'message': 'Financial data deleted successfully'}), 200
+
+@app.route('/api/financial/all', methods=['DELETE'])
+@login_required
+def delete_all_financial_data():
+    user_id = current_user.id
+    financial_data = FinancialData.query.filter_by(user_id=user_id).all()
+
+    if not financial_data:
+        return jsonify({'message': 'No financial data found'}), 404
+
+    for item in financial_data:
+        db.session.delete(item)
+    db.session.commit()
+
+    return jsonify({'message': 'All financial data deleted successfully'}), 200

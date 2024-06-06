@@ -53,14 +53,13 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             eventClick: function(info) {
                 if (confirm("Do you want to delete this event?")) {
+                    info.event.remove();
+
                     fetch(`/api/events/${info.event.id}`, {
                         method: 'DELETE',
                         headers: { 'Content-Type': 'application/json' }
                     })
                     .then(response => response.json())
-                    .then(() => {
-                        info.event.remove();
-                    })
                     .catch(error => {
                         console.error('Error deleting event:', error);
                     });
@@ -82,6 +81,31 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => console.error('Error updating financial data:', error));
     }
 
+    function updateSavingsData(amount) {
+        const data = { type: 'savings', amount };
+
+        return fetch('/api/financial', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .catch(error => console.error('Error updating savings data:', error));
+    }
+
+
+    function updateExpenseData(amount, category) {
+        const data = { amount, category };
+
+        return fetch('/api/expenses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .catch(error => console.error('Error adding expense:', error));
+    }
+
     function fetchFinancialData() {
         return fetch('/api/financial')
             .then(response => response.json())
@@ -97,157 +121,192 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderFinancialData(data) {
         try {
-            // Check if data contains the expected properties
-            if (!data) {
+            if (!data || data.earnings === undefined || data.expenses === undefined || data.savings === undefined || data.budgetGoals === undefined) {
                 throw new Error('Incomplete financial data received');
             }
-    
             document.getElementById('earnings').textContent = `$${data.earnings}`;
             document.getElementById('expenses').textContent = `$${data.expenses}`;
             document.getElementById('savings').textContent = `$${data.savings}`;
             document.getElementById('budgetGoals').textContent = `$${data.budgetGoals}`;
-    
-            // Display target values and compare them with actual values
-            const earningsElement = document.getElementById('earnings');
-            const expensesElement = document.getElementById('expenses');
-            const savingsElement = document.getElementById('savings');
-            const budgetGoalsElement = document.getElementById('budgetGoals');
-    
-            const earningsTarget = data.earningsTarget || 0;
-            const expensesTarget = data.expensesTarget || 0;
-            const savingsTarget = data.savingsTarget || 0;
-            const budgetGoalsTarget = data.budgetGoalsTarget || 0;
-    
-            // Add target values to the display
-            document.getElementById('earnings-target').textContent = `$${earningsTarget}`;
-            document.getElementById('expenses-target').textContent = `$${expensesTarget}`;
-            document.getElementById('savings-target').textContent = `$${savingsTarget}`;
-            document.getElementById('budgetGoals-target').textContent = `$${budgetGoalsTarget}`;
-    
-            // Compare actual values with targets
-            if (data.earnings < earningsTarget) {
-                earningsElement.style.color = 'red';
+            document.getElementById('availableBalance').textContent = `$${data.availableBalance}`;
+            
+            if (data.expenses > data.budgetGoals) {
+                document.getElementById('expenses').style.color = 'red';
             } else {
-                earningsElement.style.color = 'green';
+                document.getElementById('expenses').style.color = 'green';
             }
-    
-            if (data.expenses > expensesTarget) {
-                expensesElement.style.color = 'red';
-            } else {
-                expensesElement.style.color = 'green';
-            }
-    
-            if (data.savings < savingsTarget) {
-                savingsElement.style.color = 'red';
-            } else {
-                savingsElement.style.color = 'green';
-            }
-    
-            if (data.budgetGoals < budgetGoalsTarget) {
-                budgetGoalsElement.style.color = 'red';
-            } else {
-                budgetGoalsElement.style.color = 'green';
-            }
-    
         } catch (error) {
             console.error('Error rendering financial data:', error);
-            throw error; // Rethrow the error to propagate it down the promise chain
+            throw error;
         }
     }
-    
 
     function renderFinancialChart(data) {
-        try {
-            console.log('Data received in renderFinancialChart:', data);
-
-            if (!data) {
-                throw new Error('No financial data received for chart rendering');
-            }
-
-            const ctx = document.getElementById('financialChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Earnings', 'Expenses', 'Savings', 'Budget Goals'],
-                    datasets: [{
-                        label: 'Financial Overview',
-                        data: [data.earnings, data.expenses, data.savings, data.budgetGoals],
-                        backgroundColor: [
-                            'rgba(75, 192, 192, 0.2)',
-                            'rgba(255, 99, 132, 0.2)',
-                            'rgba(54, 162, 235, 0.2)',
-                            'rgba(255, 206, 86, 0.2)'
-                        ],
-                        borderColor: [
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
+        console.log('Data received in renderFinancialChart:', data);
+        if (!data) {
+            throw new Error('No data received for financial chart');
+        }
+        const ctx = document.getElementById('financialChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Expenses', 'Savings'],
+                datasets: [{
+                    data: [data.expenses, data.savings],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            color: '#333'
                         }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Expenses vs Savings',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        color: '#333'
                     }
                 }
-            });
-        } catch (error) {
-            console.error('Error rendering financial chart:', error);
+            }
+        });
+    }
+
+    function renderExpenseCategoryChart(data) {
+        console.log('Data received in renderExpenseCategoryChart:', data);
+        if (!data || !data.expenseCategories) {
+            throw new Error('No data received for expense category chart');
         }
+        const ctx = document.getElementById('expenseCategoryChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(data.expenseCategories),
+                datasets: [{
+                    data: Object.values(data.expenseCategories),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            color: '#333'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Expenses by Category',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        color: '#333'
+                    }
+                }
+            }
+        });
     }
 
     document.getElementById('earningsForm').addEventListener('submit', function(event) {
         event.preventDefault();
-        const amount = parseFloat(document.getElementById('earningsAmount').value);
-        const target = parseFloat(document.getElementById('earningsTargetAmount').value);
-        updateFinancialData('earnings', amount, target).then(fetchFinancialData).then(renderFinancialData).then(renderFinancialChart);
+        const amount = parseFloat(document.getElementById('earningsAmount').value) || 0;
+        updateFinancialData('earnings', amount)
+            .then(fetchFinancialData)
+            .then(data => {
+                renderFinancialData(data);
+                renderFinancialChart(data);
+                renderExpenseCategoryChart(data);
+            });
     });
-    
+
     document.getElementById('expensesForm').addEventListener('submit', function(event) {
         event.preventDefault();
-        const amount = parseFloat(document.getElementById('expensesAmount').value);
-        const target = parseFloat(document.getElementById('expensesTargetAmount').value);
-        updateFinancialData('expenses', amount, target).then(fetchFinancialData).then(renderFinancialData).then(renderFinancialChart);
+        const amount = parseFloat(document.getElementById('expensesAmount').value) || 0;
+        const category = document.getElementById('expensesCategory').value;
+        updateExpenseData(amount, category)
+            .then(fetchFinancialData)
+            .then(data => {
+                renderFinancialData(data);
+                renderFinancialChart(data);
+                renderExpenseCategoryChart(data);
+            });
     });
-    
-    document.getElementById('savingsForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const amount = parseFloat(document.getElementById('savingsAmount').value);
-        const target = parseFloat(document.getElementById('savingsTargetAmount').value);
-        updateFinancialData('savings', amount, target).then(fetchFinancialData).then(renderFinancialData).then(renderFinancialChart);
-    });
-    
+
     document.getElementById('budgetForm').addEventListener('submit', function(event) {
         event.preventDefault();
-        const amount = parseFloat(document.getElementById('budgetAmount').value);
-        const target = parseFloat(document.getElementById('budgetTargetAmount').value);
-        updateFinancialData('budgetGoals', amount, target).then(fetchFinancialData).then(renderFinancialData).then(renderFinancialChart);
+        const amount = parseFloat(document.getElementById('budgetAmount').value) || 0;
+        updateFinancialData('budgetGoals', amount)
+            .then(fetchFinancialData)
+            .then(data => {
+                renderFinancialData(data);
+                renderFinancialChart(data);
+                renderExpenseCategoryChart(data);
+            });
     });
-    
-    function updateFinancialData(type, amount, target) {
-        const data = { type, amount, target };
-    
-        return fetch('/api/financial', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .catch(error => console.error('Error updating financial data:', error));
-    }
-    
 
-    loadEvents().then(renderCalendar);
+    document.getElementById('savingsForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const amount = parseFloat(document.getElementById('savingsAmount').value) || 0;
+        updateSavingsData(amount)
+            .then(fetchFinancialData)
+            .then(data => {
+                renderFinancialData(data);
+                renderFinancialChart(data);
+                renderExpenseCategoryChart(data);
+            });
+    });
+
     loadQuote();
 
-    fetchFinancialData()
+    loadEvents()
+        .then(events => {
+            renderCalendar(events);
+            return fetchFinancialData();
+        })
         .then(data => {
             renderFinancialData(data);
             renderFinancialChart(data);
+            renderExpenseCategoryChart(data);
         })
-        .catch(error => console.error('Error rendering financial chart:', error));
+        .catch(error => console.error('Error rendering initial data:', error));
 });

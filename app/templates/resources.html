@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Resources{% endblock %}
+
+{% block head %}
+<style>
+    #articles-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+    .article {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 16px;
+        width: 300px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+        background-color: #fff;
+    }
+    .article img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+    .article h3 {
+        font-size: 1.5em;
+        margin: 0.5em 0;
+        color: #333;
+    }
+    .article p {
+        font-size: 1em;
+        color: #555;
+    }
+    .article a {
+        display: inline-block;
+        margin-top: 10px;
+        color: #007bff;
+        text-decoration: none;
+    }
+    .article a:hover {
+        text-decoration: underline;
+    }
+    .article:hover {
+        transform: scale(1.02);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Financial Resources</h1>
+<div id="articles-container"></div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/resources.js') }}"></script>
+{% endblock %}

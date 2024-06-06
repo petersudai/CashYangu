@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Mobile navigation toggle
     const mobileNavToggle = document.querySelector('.mobile-nav-toggle');
-    const navigation = document.querySelector('.navigation');
+    const navigation = document.querySelector('.navigation ul');
 
     mobileNavToggle.addEventListener('click', () => {
         navigation.classList.toggle('active');
