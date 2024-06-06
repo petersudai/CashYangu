@@ -1,7 +1,16 @@
 {
-  "functions": {
-    "api/*.py": {
-      "runtime": "vercel-python@0.5.2"
+  "version": 2,
+  "builds": [
+    {
+      "src": "run.py",
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "15mb" }
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "run.py"
+    }
+  ]
 }
