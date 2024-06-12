@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.5/main.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<section class="overview">
+    <h1>Welcome to Your Dashboard</h1>
+    <div class="stats">
+        <div class="stat">
+            <h2>Earnings</h2>
+            <p id="earnings">$0.00</p>
+            <form id="earningsForm">
+                <input type="number" id="earningsAmount" placeholder="Add Earnings">
+                <button type="submit">Update</button>
+            </form>
+        </div>
+        <div class="stat">
+            <h2>Budget Goals</h2>
+            <p id="budgetGoals">$0.00</p>
+            <form id="budgetForm">
+                <input type="number" id="budgetAmount" placeholder="Add Budget">
+                <button type="submit">Update</button>
+            </form>
+        </div>
+        <div class="stat">
+            <h2>Expenses</h2>
+            <p id="expenses">$0.00</p>
+            <form id="expensesForm">
+                <input type="number" id="expensesAmount" placeholder="Add Expenses">
+                <select id="expensesCategory" required>
+                    <option value="" disabled selected>Select Category</option>
+                    <option value="Home">Home🛖</option>
+                    <option value="Work">Work⚒️</option>
+                    <option value="Food">Food🥑</option>
+                    <option value="Fun">Fun🎉</option>
+                    <option value="Misc">Misc👽</option>
+                </select>
+                <button type="submit">Update</button>
+            </form>
+        </div>
+        <div class="stat">
+            <h2>Savings</h2>
+            <p id="savings">$0.00</p>
+            <form id="savingsForm">
+                <input type="number" id="savingsAmount" placeholder="Add Savings">
+                <button type="submit">Update</button>
+            </form>
+        </div>
+    </div>
+    <div class="available-balance">
+        <h2>Available Balance</h2>
+        <p id="availableBalance">$0.00</p>
+    </div>
+</section>
+
+<section class="quote">
+    <p id="quote">Loading wisdom...</p>
+</section>
+
+<section class="content-row">
+    <div class="content-column">
+        <h2>Upcoming Bills</h2>
+        <div id="calendar"></div>
+    </div>
+    <div class="content-column">
+        <h2>Financial Overview</h2>
+        <canvas id="financialChart"></canvas>
+        <canvas id="expenseCategoryChart"></canvas>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.5/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="{{ url_for('static', filename='js/dash.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}CashYangu - Financial Tracker{% endblock %}
+
+{% block content %}
+<section id="hero" class="hero">
+    <div class="hero-content">
+        <h1>Track Your Finances Effectively</h1>
+        <p>Effortless tracking for all your expenses, budgets, and savings.</p>
+        <a href="{{ url_for('register') }}" class="btn">Start Tracking Free</a>
+    </div>
+    <div class="hero-slider">
+        <div class="slides">
+            <div class="slide active">
+                <img src="{{ url_for('static', filename='images/moneycount.jpg') }}" alt="Hero Image 1">
+            </div>
+            <div class="slide">
+                <img src="{{ url_for('static', filename='images/happystudents1.jpg') }}" alt="Hero Image 2">
+            </div>
+            <div class="slide">
+                <img src="{{ url_for('static', filename='images/happyfarmer1.jpg') }}" alt="Hero Image 3">
+            </div>
+            <div class="slide">
+                <img src="{{ url_for('static', filename='images/happyfarmer2.jpg') }}" alt="Hero Image 4">
+            </div>
+            <div class="slide">
+                <img src="{{ url_for('static', filename='images/successfulpeople2.jpg') }}" alt="Hero Image 5">
+            </div>
+        </div>
+        <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+        <a class="next" onclick="plusSlides(1)">&#10095;</a>
+    </div>
+</section>
+
+<section id="features" class="features">
+    <h2>Why Choose CashYangu?</h2>
+    <div class="feature-list">
+        <div class="feature">
+            <i class="fas fa-chart-line"></i>
+            <h3>Expense Tracking</h3>
+            <p>Keep track of your daily expenses seamlessly.</p>
+        </div>
+        <div class="feature">
+            <i class="fas fa-wallet"></i>
+            <h3>Budget Planning</h3>
+            <p>Create and manage your budgets effectively.</p>
+        </div>
+        <div class="feature">
+            <i class="fas fa-piggy-bank"></i>
+            <h3>Savings Goals</h3>
+            <p>Set and achieve your savings goals.</p>
+        </div>
+    </div>
+</section>
+
+<section id="how-it-works" class="how-it-works">
+    <h2>How It Works</h2>
+    <div class="steps">
+        <div class="step">
+            <i class="fas fa-user-plus"></i>
+            <h3>Sign Up</h3>
+            <p>Create an account to get started.</p>
+        </div>
+        <div class="step">
+            <i class="fas fa-link"></i>
+            <h3>Link Your Accounts</h3>
+            <p>Securely connect your bank accounts.</p>
+        </div>
+        <div class="step">
+            <i class="fas fa-chart-bar"></i>
+            <h3>Track Your Progress</h3>
+            <p>Monitor your financial health in one place.</p>
+        </div>
+    </div>
+</section>
+
+<section id="testimonials" class="testimonials">
+    <h2>What Our Users Say</h2>
+    <div class="testimonial-list">
+        <div class="testimonial">
+            <p>"CashYangu has completely changed the way I manage my finances. It's simple, intuitive, and incredibly effective."</p>
+            <div class="testimonial-user">
+                <img src="{{ url_for('static', filename='images/boypro1.jpg') }}" alt="User Photo">
+                <span>Wambua Kamau</span>
+            </div>
+        </div>
+        <div class="testimonial">
+            <p>"Thanks to CashYangu, I've been able to save more money each month and stay on top of my budget goals."</p>
+            <div class="testimonial-user">
+                <img src="{{ url_for('static', filename='images/ladypro1.png') }}" alt="User Photo">
+                <span>Atieno Mwamburi</span>
+            </div>
+        </div>
+        <div class="testimonial">
+            <p>"The best financial tracking app I've used. The budgeting and savings features are top-notch."</p>
+            <div class="testimonial-user">
+                <img src="{{ url_for('static', filename='images/boypro2.jpg') }}" alt="User Photo">
+                <span>Ole Wafula</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="faqs" class="faqs">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-list">
+        <div class="faq">
+            <h3>How does CashYangu help me manage my finances?</h3>
+            <p>CashYangu provides tools to track your expenses, create budgets, and set savings goals, helping you stay on top of your financial health.</p>
+        </div>
+        <div class="faq">
+            <h3>Is my financial data secure?</h3>
+            <p>Yes, CashYangu uses industry-standard encryption to ensure your data is safe and secure.</p>
+        </div>
+        <div class="faq">
+            <h3>Can I link multiple bank accounts?</h3>
+            <p>Yes, you can securely connect multiple bank accounts to track all your finances in one place.</p>
+        </div>
+    </div>
+</section>
+
+<section id="call-to-action" class="call-to-action">
+    <h2>Ready to Take Control of Your Finances?</h2>
+    <a href="{{ url_for('register') }}" class="btn">Get Started Now</a>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let slideIndex = 0;
+    showSlides(slideIndex);
+
+    function plusSlides(n) {
+        showSlides(slideIndex += n);
+    }
+
+    function showSlides(n) {
+        let slides = document.getElementsByClassName("slide");
+        if (n >= slides.length) { slideIndex = 0 }
+        if (n < 0) { slideIndex = slides.length - 1 }
+        for (let i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none";
+        }
+        slides[slideIndex].style.display = "block";
+    }
+
+    setInterval(function() {
+        slideIndex++;
+        showSlides(slideIndex);
+    }, 5000); // Change image every 5 seconds
+</script>
+<style>
+    .hero {
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-slider {
+        position: relative;
+        width: 100%;
+        height: 600px; /* Fixed height for all images */
+    }
+    .hero-slider .slide {
+        display: none;
+        width: 100%;
+        height: 100%;
+    }
+    .hero-slider .slide.active {
+        display: block;
+    }
+    .hero-slider img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Ensures images cover the container while maintaining aspect ratio */
+        border-radius: 10px; /* Rounded edges */
+    }
+    .prev, .next {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        width: auto;
+        padding: 16px;
+        margin-top: -22px;
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+        transition: 0.6s ease;
+        border-radius: 0 3px 3px 0;
+        user-select: none;
+    }
+    .next {
+        right: 0;
+        border-radius: 3px 0 0 3px;
+    }
+    .prev:hover, .next:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+</style>
+{% endblock %}

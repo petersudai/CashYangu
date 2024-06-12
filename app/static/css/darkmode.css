@@ -1,0 +1,78 @@
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.header.dark-mode {
+    background-color: #1f1f1f;
+}
+
+.navigation.dark-mode ul li a {
+    color: #e0e0e0;
+}
+
+.stats .stat.dark-mode {
+    background-color: #1f1f1f;
+    border: 1px solid #333;
+}
+
+.available-balance.dark-mode {
+    background-color: #333;
+    color: #00ff00;
+}
+
+.quote.dark-mode {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+.calendar.dark-mode #calendar,
+.financial-overview.dark-mode #financialChart {
+    background-color: #1f1f1f;
+}
+
+.financial-table.dark-mode {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+.financial-table.dark-mode th,
+.financial-table.dark-mode td {
+    border: 1px solid #333;
+}
+
+.btn-download.dark-mode {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+.btn-toggle {
+    background-color: #1f1f1f;
+    border: 1px solid #444;
+    color: #e0e0e0;
+}
+
+.btn-toggle:hover {
+    background-color: #333;
+    border: 1px solid #555;
+}
+
+.dark-mode .btn {
+    background-color: #444;
+    color: #fff;
+}
+
+.dark-mode .btn:hover {
+    background-color: #555;
+}
+
+.dark-mode .btn-update {
+    background-color: #ffcc00;
+    color: #000;
+}
+
+.dark-mode .btn-update:hover {
+    background-color: #ffd633;
+}
