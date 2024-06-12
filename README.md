@@ -26,6 +26,7 @@ Follow these steps to set up the CashYangu project on your local machine:
    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
 
 3. **Install Dependencies**:
+<<<<<<< HEAD
     ```bash
     pip install -r requirements.txt\
 
@@ -82,3 +83,7 @@ After this open a pull request from your forked repository's feature branch to t
 CashYangu is under the MIT License.
 
 
+=======
+   ```bash
+   pip install -r requirements.txt
+>>>>>>> ea2cbfcf45c868a1da1a07a69fb3181c711fce82
