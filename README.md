@@ -9,7 +9,7 @@ CashYangu is a web-based application aimed at simplifying personal financial man
 ### Links
 
 - **Deployed Site**: [CashYangu](https://cash-yangu-r3t1h6r11-petersudais-projects.vercel.app/)
-- **Final Project Blog Article**: [CashYangu Project Blog](https://your-blog-url.com)
+- **Final Project Blog Article**: [CashYangu Project Blog](https://medium.com/@psudai/building-cashyangu-your-personal-finance-tracker-6477c9e11933)
 - **Author LinkedIn**: [Peter Sudai](https://www.linkedin.com/in/peter-sudai-3b467313b/)
 
 ## Installation
