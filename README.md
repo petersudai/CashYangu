@@ -2,6 +2,8 @@
 
 Welcome to CashYangu, a comprehensive financial tracking web application designed to help you manage your expenses, budget, and savings efficiently. This README provides detailed instructions on how to get started, contribute, and understand the project's scope and functionality.
 
+![CashYangu Logo](app/static/images/cashyangulogo.png)
+
 ## Introduction
 
 CashYangu is a web-based application aimed at simplifying personal financial management. With features to log your earnings, expenses, savings, and budget goals, CashYangu provides a user-friendly interface to keep your finances in check. The app also offers insightful financial reports and charts to help you visualize your financial health.
@@ -43,6 +45,7 @@ Follow these steps to set up the CashYangu project on your local machine:
     ```bash
     flask run
 
+![Hero Section of the Landing Page](app/static/images/landingpage.png)
 
 ## Usage
 
