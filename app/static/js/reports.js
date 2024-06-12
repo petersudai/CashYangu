@@ -106,4 +106,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw error;
             });
     }
+
+    fetchFinancialData().then(data => {
+        renderFinancialData(data);
+    });
+
+    function renderFinancialData(data) {
+        const userTimezone = moment.tz.guess();
+        reportsContainer.innerHTML = data.map(item => {
+            const localDate = moment.utc(item.date).tz(userTimezone).format('YYYY-MM-DD HH:mm:ss');
+            return `
+                <tr data-id="${item.id}">
+                    <td>${localDate}</td>
+                    <td>${item.type}</td>
+                    <td>${item.amount}</td>
+                    <td>${item.category || ''}</td>
+                    <td><button class="delete-button">Delete</button></td>
+                </tr>
+            `;
+        }).join('');
+    }
 });
