@@ -11,7 +11,9 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {
         'connect_args': {
             'ssl': {
-                'ca': os.path.join(basedir, 'ca.pem')
+                'ca': os.path.join(basedir, 'ca.pem'),
+                'check_hostname': False,
+                'verify_cert': True
             }
         }
     }
