@@ -21,10 +21,10 @@ Follow these steps to set up the CashYangu project on your local machine:
    git clone https://github.com/petersudai/CashYangu.git
    cd CashYangu
 2. **Set Up a Virtual Environment**:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
 
 3. **Install Dependencies**:
-```bash
-pip install -r requirements.txt
+   ```bash
+   pip install -r requirements.txt
