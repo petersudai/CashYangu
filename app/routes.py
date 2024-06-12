@@ -5,7 +5,11 @@ from flask_login import login_user, current_user, logout_user, login_required
 from app import app, db, bcrypt
 from app.forms import RegistrationForm, LoginForm
 from app.models import User, Event, FinancialData
-from datetime import datetime
+from datetime import datetime, timezone
+
+# Helper function to get the time in UTC
+def get_current_time():
+    return datetime.now(timezone.utc)
 
 @app.route("/")
 @app.route("/home")
