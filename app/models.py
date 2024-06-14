@@ -10,8 +10,8 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     events = db.relationship('Event', backref='user', lazy=True)
-    financial_data = db.relationship('FinancialData', back_populates='user')    
-
+    financial_data = db.relationship('FinancialData', back_populates='user')
+    timezone = db.Column(db.String(50), nullable=True, default='UTC')
 
     def __repr__(self):
         return f"User('{self.username}', '{self.email}')"
