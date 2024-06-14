@@ -6,6 +6,7 @@ from app import app, db, bcrypt
 from app.forms import RegistrationForm, LoginForm
 from app.models import User, Event, FinancialData
 from datetime import datetime, timezone
+import pytz
 
 # Helper function to get the time in UTC
 def get_current_time():
@@ -55,10 +56,39 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-@app.route("/profile")
+# Profile section
+@app.route("/profile", methods=['GET', 'POST'])
 @login_required
 def profile():
-    return render_template('profile.html')
+    if request.method == 'POST':
+        current_user.username = request.form['username']
+        current_user.email = request.form['email']
+        current_user.timezone = request.form['timezone']
+        db.session.commit()
+        flash('Your profile has been updated!', 'success')
+        return redirect(url_for('profile'))
+    timezones = pytz.all_timezones
+    return render_template('profile.html', timezones=timezones)
+
+@app.route("/update_profile", methods=['POST'])
+@login_required
+def update_profile():
+    current_user.username = request.json['username']
+    current_user.email = request.json['email']
+    current_user.timezone = request.json['timezone']
+    db.session.commit()
+    return jsonify({'status': 'success', 'message': 'Profile updated successfully'})
+
+@app.route("/change_password", methods=['POST'])
+@login_required
+def change_password():
+    data = request.json
+    if not bcrypt.check_password_hash(current_user.password, data['current_password']):
+        return jsonify({'status': 'error', 'message': 'Current password is incorrect'})
+    current_user.password = bcrypt.generate_password_hash(data['new_password']).decode('utf-8')
+    db.session.commit()
+    return jsonify({'status': 'success', 'message': 'Password changed successfully'})
+
 
 @app.route("/reports")
 @login_required

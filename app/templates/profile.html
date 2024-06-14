@@ -4,5 +4,121 @@
 
 {% block content %}
 <h1>Profile Settings</h1>
-<!-- Profile settings content -->
+
+<div class="profile-container">
+    <div class="profile-section">
+        <h2>Personal Information</h2>
+        <form id="profile-form" method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" value="{{ current_user.username }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
+            </div>
+            <div class="form-group">
+                <label for="timezone">Timezone</label>
+                <select id="timezone" name="timezone" required>
+                    {% for timezone in timezones %}
+                        <option value="{{ timezone }}" {% if timezone == current_user.timezone %}selected{% endif %}>{{ timezone }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn">Update Profile</button>
+        </form>
+    </div>
+
+    <div class="profile-section">
+        <h2>Change Password</h2>
+        <form id="password-form" method="POST">
+            <div class="form-group">
+                <label for="current_password">Current Password</label>
+                <input type="password" id="current_password" name="current_password" required>
+            </div>
+            <div class="form-group">
+                <label for="new_password">New Password</label>
+                <input type="password" id="new_password" name="new_password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm_new_password">Confirm New Password</label>
+                <input type="password" id="confirm_new_password" name="confirm_new_password" required>
+            </div>
+            <button type="submit" class="btn">Change Password</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const profileForm = document.getElementById('profile-form');
+        const updateProfileUrl = "{{ url_for('update_profile') }}";
+        profileForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const timezone = document.getElementById('timezone').value;
+
+            fetch(updateProfileUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    email: email,
+                    timezone: timezone
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    alert(data.message);
+                } else {
+                    alert('Profile updated successfully');
+                    window.location.reload();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        const passwordForm = document.getElementById('password-form');
+        const changePasswordUrl = "{{ url_for('change_password') }}";
+        passwordForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const currentPassword = document.getElementById('current_password').value;
+            const newPassword = document.getElementById('new_password').value;
+            const confirmNewPassword = document.getElementById('confirm_new_password').value;
+
+            if (newPassword !== confirmNewPassword) {
+                alert('New password and confirmation do not match.');
+                return;
+            }
+
+            fetch(changePasswordUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    current_password: currentPassword,
+                    new_password: newPassword
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    alert(data.message);
+                } else {
+                    alert('Password changed successfully');
+                    window.location.reload();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+</script>
+
 {% endblock %}
