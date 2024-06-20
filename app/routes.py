@@ -31,6 +31,7 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
+# Login route
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -114,11 +115,13 @@ def download_report():
     
     return send_file(output, download_name="financial_report.csv", as_attachment=True, mimetype='text/csv')
 
+# Resources
 @app.route("/resources")
 @login_required
 def resources_page():
     return render_template('resources.html')
 
+# Page that shows the registered user. This is only for development purposes
 @app.route("/users")
 @login_required
 def users():
@@ -306,6 +309,7 @@ def add_expense():
 #     response.headers['Content-type'] = 'text/csv'
 #     return response
 
+
 # Articles API
 API_KEY = '44fe38a257d34ca887e4c2bf26a2bc76'
 API_URL = 'https://newsapi.org/v2/everything?q=finance&apiKey=' + API_KEY
@@ -340,6 +344,7 @@ def get_articles():
 def resources():
     return render_template('resources.html')
 
+# Feature to delete user financial entries.
 @app.route('/api/financial/<int:id>', methods=['DELETE'])
 @login_required
 def delete_financial_data(id):
