@@ -127,6 +127,21 @@
     <a href="{{ url_for('register') }}" class="btn">Get Started Now</a>
     <a href="{{ url_for('demo_mode') }}" class="btn btn-demo">Try Demo</a>
 </section>
+
+<section id="contact-me" class="contact-me">
+    <h2>Contacts</h2>
+    <div class="social-icons">
+        <a href="https://www.linkedin.com/in/peter-sudai-3b467313b/" target="_blank" class="social-icon">
+            <i class="fab fa-linkedin"></i>
+        </a>
+        <a href="https://github.com/petersudai" target="_blank" class="social-icon">
+            <i class="fab fa-github"></i>
+        </a>
+        <a href="https://twitter.com/PeterSudai" target="_blank" class="social-icon">
+            <i class="fab fa-twitter"></i>
+        </a>
+    </div>
+</section>
 {% endblock %}
 
 {% block scripts %}
@@ -197,6 +212,38 @@
     }
     .prev:hover, .next:hover {
         background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .contact-me {
+        text-align: center;
+        padding: 50px 0;
+        background-color: #f9f9f9;
+    }
+    .contact-me h2 {
+        margin-bottom: 20px;
+    }
+    .social-icons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+    .social-icon {
+        font-size: 30px;
+        color: #555;
+        transition: color 0.3s;
+    }
+    .social-icon:hover {
+        color: #0073b1; /* LinkedIn */
+    }
+    .social-icon:hover .fab.fa-github {
+        color: #333;
+    }
+    .social-icon:hover .fab.fa-twitter {
+        color: #1da1f2;
+    }
+
+    .btn:hover {
+        color:rgb(70, 75, 80);
     }
 </style>
 {% endblock %}
