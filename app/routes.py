@@ -5,8 +5,10 @@ from flask_login import login_user, current_user, logout_user, login_required
 from app import app, db, bcrypt
 from app.forms import RegistrationForm, LoginForm
 from app.models import User, Event, FinancialData
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import pytz
+import json
+import uuid
 
 # Helper function to get the time in UTC
 def get_current_time():
@@ -47,20 +49,66 @@ def login():
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form=form)
 
+# Create a temporary user ID for demo purposes
+DEMO_USER_ID = 'demo_user'
+
+def is_demo_user():
+    return session.get('user_id') == DEMO_USER_ID
+
+def generate_demo_id():
+    return str(uuid.uuid4())
+
+def get_demo_user():
+    if is_demo_user():
+        return {
+            'id': DEMO_USER_ID,
+            'username': 'Demo User',
+            'email': 'demo@cashyangu.com',
+            'timezone': 'UTC'
+        }
+    return None
+
+@app.before_request
+def load_demo_user():
+    if is_demo_user():
+        session['user'] = get_demo_user()
+
+@app.route("/demo_mode")
+def demo_mode():
+    session['user_id'] = DEMO_USER_ID
+    session['demo_user'] = True
+    session['demo_events'] = json.dumps([])  # Initialize demo events
+    session['demo_financial_data'] = json.dumps([])  # Initialize demo financial data
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=15)
+    flash("You are in demo mode. Your data will not be saved permanently.", "info")
+    return redirect(url_for('dashboard'))
+
 @app.route("/dashboard")
-@login_required
 def dashboard():
-    return render_template('dashboard.html')
+    if is_demo_user() or current_user.is_authenticated:
+        return render_template('dashboard.html')
+    return redirect(url_for('login'))
 
 @app.route("/logout")
 def logout():
     logout_user()
+    if is_demo_user():
+        session.clear()
     return redirect(url_for('home'))
 
 # Profile section
 @app.route("/profile", methods=['GET', 'POST'])
-@login_required
 def profile():
+    if is_demo_user():
+        if request.method == 'POST':
+            flash("Profile changes are not allowed in demo mode.", "warning")
+        timezones = pytz.all_timezones
+        return render_template('profile.html', timezones=timezones)
+    
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
         current_user.username = request.form['username']
         current_user.email = request.form['email']
@@ -68,12 +116,15 @@ def profile():
         db.session.commit()
         flash('Your profile has been updated!', 'success')
         return redirect(url_for('profile'))
+    
     timezones = pytz.all_timezones
     return render_template('profile.html', timezones=timezones)
 
 @app.route("/update_profile", methods=['POST'])
-@login_required
 def update_profile():
+    if is_demo_user():
+        return jsonify({'status': 'error', 'message': 'Profile changes are not allowed in demo mode'})
+    
     current_user.username = request.json['username']
     current_user.email = request.json['email']
     current_user.timezone = request.json['timezone']
@@ -81,8 +132,10 @@ def update_profile():
     return jsonify({'status': 'success', 'message': 'Profile updated successfully'})
 
 @app.route("/change_password", methods=['POST'])
-@login_required
 def change_password():
+    if is_demo_user():
+        return jsonify({'status': 'error', 'message': 'Password changes are not allowed in demo mode'})
+    
     data = request.json
     if not bcrypt.check_password_hash(current_user.password, data['current_password']):
         return jsonify({'status': 'error', 'message': 'Current password is incorrect'})
@@ -92,8 +145,14 @@ def change_password():
 
 
 @app.route("/reports")
-@login_required
 def reports():
+    if is_demo_user():
+        demo_data = json.loads(session.get('demo_financial_data', '[]'))
+        return render_template('reports.html', data=demo_data)
+
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    
     user_id = current_user.id
     data = FinancialData.query.filter_by(user_id=user_id).all()
     return render_template('reports.html', data=data)
@@ -117,7 +176,6 @@ def download_report():
 
 # Resources
 @app.route("/resources")
-@login_required
 def resources_page():
     return render_template('resources.html')
 
@@ -129,49 +187,116 @@ def users():
     return render_template('users.html', title='Users', users=users)
 
 # Event routes
-@app.route('/api/events', methods=['GET'])
-@login_required
-def get_events():
-    events = Event.query.filter_by(user_id=current_user.id).all()
-    events_data = [{
-        'id': event.id,
-        'title': event.title,
-        'start': event.start.isoformat(),
-        'end': event.end.isoformat() if event.end else None,
-        'allDay': event.all_day
-    } for event in events]
+@app.route('/api/events', methods=['GET', 'POST'])
+def manage_events():
+    if is_demo_user():
+        if request.method == 'GET':
+            demo_events = json.loads(session.get('demo_events', '[]'))
+            return jsonify(demo_events)
+        if request.method == 'POST':
+            data = request.get_json()
+            demo_events = json.loads(session.get('demo_events', '[]'))
+            new_event = {
+                'id': generate_demo_id(),
+                'title': data.get('title'),
+                'start': data.get('start'),
+                'end': data.get('end'),
+                'allDay': data.get('allDay', True)
+            }
+            demo_events.append(new_event)
+            session['demo_events'] = json.dumps(demo_events)
+            return jsonify({'message': 'Event added successfully'}), 201
 
-    return jsonify(events_data)
+    if not current_user.is_authenticated:
+        return jsonify({'message': 'Unauthorized'}), 401
 
-@app.route('/api/events', methods=['POST'])
-@login_required
-def add_event():
-    data = request.get_json()
-    title = data.get('title')
-    start = datetime.fromisoformat(data.get('start'))
-    end = datetime.fromisoformat(data.get('end')) if data.get('end') else None
-    all_day = data.get('allDay', True)
+    if request.method == 'GET':
+        events = Event.query.filter_by(user_id=current_user.id).all()
+        events_data = [{
+            'id': event.id,
+            'title': event.title,
+            'start': event.start.isoformat(),
+            'end': event.end.isoformat() if event.end else None,
+            'allDay': event.all_day
+        } for event in events]
 
-    new_event = Event(user_id=current_user.id, title=title, start=start, end=end, all_day=all_day)
-    db.session.add(new_event)
-    db.session.commit()
+        return jsonify(events_data)
 
-    return jsonify({'message': 'Event added successfully'})
+    if request.method == 'POST':
+        data = request.get_json()
+        new_event = Event(
+            user_id=current_user.id,
+            title=data.get('title'),
+            start=datetime.fromisoformat(data.get('start')),
+            end=datetime.fromisoformat(data.get('end')) if data.get('end') else None,
+            all_day=data.get('allDay', True)
+        )
+        db.session.add(new_event)
+        db.session.commit()
+
+        return jsonify({'message': 'Event added successfully'}), 201
 
 @app.route('/api/events/<int:event_id>', methods=['DELETE'])
-@login_required
 def delete_event(event_id):
+    if is_demo_user():
+        demo_events = json.loads(session.get('demo_events', '[]'))
+        demo_events = [event for event in demo_events if event['id'] != event_id]
+        session['demo_events'] = json.dumps(demo_events)
+        return jsonify({'message': 'Event deleted successfully'})
+
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    
     event = Event.query.get(event_id)
     if event and event.user_id == current_user.id:
         db.session.delete(event)
         db.session.commit()
-        return jsonify({'message': 'Event deleted successfully'})
+        return jsonify({'message': 'Event deleted successfully'}), 200
     return jsonify({'message': 'Event not found or unauthorized'}), 404
 
 # Fetch financial data
 @app.route('/api/financial', methods=['GET', 'POST'])
-@login_required
 def manage_financial_data():
+    if is_demo_user():
+        if request.method == 'GET':
+            demo_data = json.loads(session.get('demo_financial_data', '[]'))
+            earnings = sum(item['amount'] for item in demo_data if item['type'] == 'earnings')
+            expenses = sum(item['amount'] for item in demo_data if item['type'] == 'expenses')
+            savings = sum(item['amount'] for item in demo_data if item['type'] == 'savings')
+            budget_goals = sum(item['amount'] for item in demo_data if item['type'] == 'budgetGoals')
+            available_balance = earnings - expenses
+            expense_categories = {}
+            for item in demo_data:
+                if item['type'] == 'expenses':
+                    if item['category'] not in expense_categories:
+                        expense_categories[item['category']] = 0
+                    expense_categories[item['category']] += item['amount']
+            response_data = {
+                'earnings': earnings or 0,
+                'expenses': expenses or 0,
+                'savings': savings or 0,
+                'budgetGoals': budget_goals or 0,
+                'availableBalance': available_balance or 0,
+                'expenseCategories': {k: v or 0 for k, v in expense_categories.items()}
+            }
+            return jsonify(response_data)
+        if request.method == 'POST':
+            data = request.get_json()
+            demo_data = json.loads(session.get('demo_financial_data', '[]'))
+            new_data = {
+                'id': generate_demo_id(),
+                'date': datetime.now().isoformat(),
+                'type': data.get('type'),
+                'amount': data.get('amount'),
+                'category': data.get('category')
+            }
+            demo_data.append(new_data)
+            session['demo_financial_data'] = json.dumps(demo_data)
+            return jsonify({'message': 'Financial data added/adjusted successfully'}), 201
+    
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    
     if request.method == 'GET':
         user_id = current_user.id
         current_month = datetime.now().month
@@ -252,8 +377,23 @@ def manage_financial_data():
 
 
 @app.route('/api/financial_report', methods=['GET'])
-@login_required
 def get_detailed_financial_data():
+    if is_demo_user():
+        demo_data = json.loads(session.get('demo_financial_data', '[]'))
+        financial_data = [
+            {
+                'date': item['date'],
+                'type': item['type'],
+                'amount': item['amount'],
+                'category': item['category']
+            }
+            for item in demo_data
+        ]
+        return jsonify(financial_data)
+
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
     user_id = current_user.id
     data = FinancialData.query.filter_by(user_id=user_id).all()
     financial_data = [
@@ -269,8 +409,24 @@ def get_detailed_financial_data():
 
 
 @app.route('/api/expenses', methods=['POST'])
-@login_required
 def add_expense():
+    if is_demo_user():
+        data = request.get_json()
+        demo_data = json.loads(session.get('demo_financial_data', '[]'))
+        new_data = {
+            'id': generate_demo_id(),
+            'date': datetime.now().isoformat(),
+            'type': 'expenses',
+            'amount': data['amount'],
+            'category': data['category']
+        }
+        demo_data.append(new_data)
+        session['demo_financial_data'] = json.dumps(demo_data)
+        return jsonify({'message': 'Expense added successfully'}), 201
+
+    if not current_user.is_authenticated:
+        return jsonify({'message': 'Unauthorized'}), 401
+ 
     data = request.get_json()
     expense = FinancialData(
         user_id=current_user.id,
@@ -345,23 +501,41 @@ def resources():
     return render_template('resources.html')
 
 # Feature to delete user financial entries.
-@app.route('/api/financial/<int:id>', methods=['DELETE'])
-@login_required
+@app.route('/api/financial/<id>', methods=['DELETE'])
 def delete_financial_data(id):
-    user_id = current_user.id
-    financial_data = FinancialData.query.filter_by(id=id, user_id=user_id).first()
+    if is_demo_user():
+        demo_data = json.loads(session.get('demo_financial_data', '[]'))
+        demo_data = [item for item in demo_data if item.get('id') != id]
+        session['demo_financial_data'] = json.dumps(demo_data)
+        return jsonify({'message': 'Financial data deleted successfully'}), 200
 
-    if not financial_data:
-        return jsonify({'message': 'Financial data not found'}), 404
+    if not current_user.is_authenticated:
+        return jsonify({'message': 'Unauthorized'}), 401
+    
+    try:
+        user_id = current_user.id
+        financial_data = FinancialData.query.filter_by(id=int(id), user_id=user_id).first()
 
-    db.session.delete(financial_data)
-    db.session.commit()
+        if not financial_data:
+            return jsonify({'message': 'Financial data not found'}), 404
+
+        db.session.delete(financial_data)
+        db.session.commit()
+    except ValueError:
+        return jsonify({'message': 'Invalid ID format'}), 400
 
     return jsonify({'message': 'Financial data deleted successfully'}), 200
 
+
 @app.route('/api/financial/all', methods=['DELETE'])
-@login_required
 def delete_all_financial_data():
+    if is_demo_user():
+        session['demo_financial_data'] = json.dumps([])
+        return jsonify({'message': 'All financial data deleted successfully'}), 200
+
+    if not current_user.is_authenticated:
+        return jsonify({'message': 'Unauthorized'}), 401
+    
     user_id = current_user.id
     financial_data = FinancialData.query.filter_by(user_id=user_id).all()
 

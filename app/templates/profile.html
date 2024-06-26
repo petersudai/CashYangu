@@ -5,49 +5,52 @@
 {% block content %}
 <h1>Profile Settings</h1>
 
-<div class="profile-container">
-    <div class="profile-section">
-        <h2>Personal Information</h2>
-        <form id="profile-form" method="POST">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" value="{{ current_user.username }}" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
-            </div>
-            <div class="form-group">
-                <label for="timezone">Timezone</label>
-                <select id="timezone" name="timezone" required>
-                    {% for timezone in timezones %}
-                        <option value="{{ timezone }}" {% if timezone == current_user.timezone %}selected{% endif %}>{{ timezone }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button type="submit" class="btn">Update Profile</button>
-        </form>
-    </div>
+{% if session.get('demo_user') %}
+    <p>You are in demo mode. Profile changes are not allowed.</p>
+{% else %}
+    <div class="profile-container">
+        <div class="profile-section">
+            <h2>Personal Information</h2>
+            <form id="profile-form" method="POST" action="{{ url_for('update_profile') }}">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value="{{ current_user.username }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="timezone">Timezone</label>
+                    <select id="timezone" name="timezone" required>
+                        {% for timezone in timezones %}
+                            <option value="{{ timezone }}" {% if timezone == current_user.timezone %}selected{% endif %}>{{ timezone }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn">Update Profile</button>
+            </form>
+        </div>
 
-    <div class="profile-section">
-        <h2>Change Password</h2>
-        <form id="password-form" method="POST">
-            <div class="form-group">
-                <label for="current_password">Current Password</label>
-                <input type="password" id="current_password" name="current_password" required>
-            </div>
-            <div class="form-group">
-                <label for="new_password">New Password</label>
-                <input type="password" id="new_password" name="new_password" required>
-            </div>
-            <div class="form-group">
-                <label for="confirm_new_password">Confirm New Password</label>
-                <input type="password" id="confirm_new_password" name="confirm_new_password" required>
-            </div>
-            <button type="submit" class="btn">Change Password</button>
-        </form>
+        <div class="profile-section">
+            <h2>Change Password</h2>
+            <form id="password-form" method="POST" action="{{ url_for('change_password') }}">
+                <div class="form-group">
+                    <label for="current_password">Current Password</label>
+                    <input type="password" id="current_password" name="current_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_password">New Password</label>
+                    <input type="password" id="new_password" name="new_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_new_password">Confirm New Password</label>
+                    <input type="password" id="confirm_new_password" name="confirm_new_password" required>
+                </div>
+                <button type="submit" class="btn">Change Password</button>
+            </form>
+        </div>
     </div>
-</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -120,5 +123,6 @@
         });
     });
 </script>
+{% endif %}
 
 {% endblock %}
