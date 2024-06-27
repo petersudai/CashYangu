@@ -8,6 +8,7 @@ from app.models import User, Event, FinancialData
 from datetime import datetime, timezone, timedelta
 import pytz
 import json
+import os
 import uuid
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -470,7 +471,12 @@ def add_expense():
 
 
 # Articles API
-nltk.download('vader_lexicon')
+
+nltk_data_path = '/tmp/nltk_data'  # Using /tmp directory for Lambda compatibility
+os.makedirs(nltk_data_path, exist_ok=True)
+os.environ['NLTK_DATA'] = nltk_data_path
+
+nltk.download('vader_lexicon', download_dir=nltk_data_path)
 
 API_KEY = '44fe38a257d34ca887e4c2bf26a2bc76'
 API_URL = 'https://newsapi.org/v2/everything?q=finance&apiKey=' + API_KEY
