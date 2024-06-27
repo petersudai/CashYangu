@@ -8,17 +8,45 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    function loadQuote() {
-        return fetch('https://api.quotable.io/random')
+    // function loadQuote() {
+    //     return fetch('https://api.quotable.io/random')
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             document.getElementById('quote').textContent = data.content + " — " + data.author;
+    //         })
+    //         .catch(error => {
+    //             console.error('Error fetching quote:', error);
+    //             document.getElementById('quote').textContent = "Failed to load quote.";
+    //         });
+    // }
+
+    function loadQuotesFromJSON() {
+        return fetch('static/quotes.json') // Replace with the actual path to your quotes.json file
             .then(response => response.json())
-            .then(data => {
-                document.getElementById('quote').textContent = data.content + " — " + data.author;
+            .catch(error => {
+                console.error('Error loading quotes:', error);
+                return [];
+            });
+    }
+
+    function loadQuote() {
+        loadQuotesFromJSON()
+            .then(quotes => {
+                if (quotes.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * quotes.length);
+                    const quote = quotes[randomIndex];
+                    document.getElementById('quote').textContent = `${quote.content} — ${quote.author}`;
+                } else {
+                    document.getElementById('quote').textContent = "No quote found.";
+                }
             })
             .catch(error => {
                 console.error('Error fetching quote:', error);
                 document.getElementById('quote').textContent = "Failed to load quote.";
             });
     }
+
+
 
     function renderCalendar(events) {
         const calendarEl = document.getElementById('calendar');
@@ -297,6 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     loadQuote();
+    setInterval(loadQuote, 120000); // Reload quote every 2 minutes
 
     loadEvents()
         .then(events => {
