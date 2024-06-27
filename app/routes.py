@@ -9,6 +9,9 @@ from datetime import datetime, timezone, timedelta
 import pytz
 import json
 import uuid
+import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
 
 # Helper function to get the time in UTC
 def get_current_time():
@@ -467,34 +470,53 @@ def add_expense():
 
 
 # Articles API
+nltk.download('vader_lexicon')
+
 API_KEY = '44fe38a257d34ca887e4c2bf26a2bc76'
 API_URL = 'https://newsapi.org/v2/everything?q=finance&apiKey=' + API_KEY
 
-@app.route("/api/articles", methods=['GET'])
-def get_articles():
+def fetch_articles():
     try:
         response = requests.get(API_URL)
         response.raise_for_status()  # Raise an exception for HTTP errors
-        articles = response.json().get('articles', [])
-
-        financial_articles = [
-            {
-                'title': article['title'],
-                'content': article['description'] if article['description'] else article['content'],
-                'imageUrl': article.get('urlToImage', 'default-image-url'),  # Fallback image URL if not available
-                'url': article['url']
-            }
-            for article in articles
-            if 'finance' in article['title'].lower() or 'finance' in article['description'].lower()
-            or 'financial' in article['title'].lower() or 'financial' in article['description'].lower()
-            or 'investment' in article['title'].lower() or 'investment' in article['description'].lower()
-            or 'saving' in article['title'].lower() or 'saving' in article['description'].lower()
-            or 'budget' in article['title'].lower() or 'budget' in article['description'].lower()
-        ]
-        return jsonify(financial_articles)
+        return response.json().get('articles', [])
     except requests.exceptions.RequestException as e:
         print(f'Error fetching articles: {e}')
-        return jsonify({'error': 'Failed to fetch articles'}), 500
+        return []
+
+def filter_articles(articles):
+    keywords = [
+        'finance guru', 'cardone', 'buffet', 'ramsey', 'tony robbins', 'david bach', 'diary of a ceo', 'journaling', 'finance', 'expense', 'financial', 'investment', 'saving', 'budget', 'bond', 'frugal',
+        'economy', 'stock', 'market', 'wealth', 'retirement', 'insurance', 'price', 'side hustle',
+        'personal finance', 'financial planning', 'money management', 'crypto', 'tracking', 'income'
+    ]
+    unwanted_keywords = ['china', 'divorcee','russia', 'ukraine', 'politics', 'sports', 'gossip', 'army', 'president', 'trump']
+    
+    sid = SentimentIntensityAnalyzer()
+
+    filtered_articles = []
+    for article in articles:
+        content = article['description'] if article['description'] else article['content']
+        if any(keyword in (article['title'] + ' ' + content).lower() for keyword in keywords):
+            if not any(unwanted in (article['title'] + ' ' + content).lower() for unwanted in unwanted_keywords):
+                sentiment_score = sid.polarity_scores(content)['compound']
+                if sentiment_score > 0:  # Consider only positive or neutral articles
+                    filtered_articles.append({
+                        'title': article['title'],
+                        'content': content,
+                        'imageUrl': article.get('urlToImage', 'default-image-url'),  # Fallback image URL if not available
+                        'url': article['url'],
+                        'score': sentiment_score
+                    })
+    filtered_articles.sort(key=lambda x: x['score'], reverse=True)  # Sort by sentiment score
+    return filtered_articles
+
+@app.route("/api/articles", methods=['GET'])
+def get_articles():
+    articles = fetch_articles()
+    filtered_articles = filter_articles(articles)
+    return jsonify(filtered_articles)
+
 
 @app.route("/resources")
 def resources():
