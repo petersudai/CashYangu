@@ -152,11 +152,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!data || data.earnings === undefined || data.expenses === undefined || data.savings === undefined || data.budgetGoals === undefined) {
                 throw new Error('Incomplete financial data received');
             }
-            document.getElementById('earnings').textContent = `$${data.earnings}`;
-            document.getElementById('expenses').textContent = `$${data.expenses}`;
-            document.getElementById('savings').textContent = `$${data.savings}`;
-            document.getElementById('budgetGoals').textContent = `$${data.budgetGoals}`;
-            document.getElementById('availableBalance').textContent = `$${data.availableBalance}`;
+            document.getElementById('earnings').textContent = `KSH${data.earnings}`;
+            document.getElementById('expenses').textContent = `KSH${data.expenses}`;
+            document.getElementById('savings').textContent = `KSH${data.savings}`;
+            document.getElementById('budgetGoals').textContent = `KSH${data.budgetGoals}`;
+            document.getElementById('availableBalance').textContent = `KSH${data.availableBalance}`;
             
             if (data.expenses > data.budgetGoals) {
                 document.getElementById('expenses').style.color = 'red';
@@ -200,6 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         labels: {
                             font: {
                                 size: 14,
+                                family: 'Montserrat',
                                 weight: 'bold'
                             },
                             color: '#333'
@@ -210,6 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         text: 'Expenses vs Savings',
                         font: {
                             size: 18,
+                            family: 'Montserrat',
                             weight: 'bold'
                         },
                         color: '#333'
@@ -256,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         labels: {
                             font: {
                                 size: 14,
+                                family: 'Montserrat',
                                 weight: 'bold'
                             },
                             color: '#333'
@@ -266,6 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         text: 'Expenses by Category',
                         font: {
                             size: 18,
+                            family: 'Montserrat',
                             weight: 'bold'
                         },
                         color: '#333'
