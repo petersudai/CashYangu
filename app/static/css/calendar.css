@@ -4,20 +4,25 @@
 }
 
 #calendar {
-    max-width: 700px;
+    max-width: 100%;
     margin: 0 auto;
     background-color: #fff7e6;
+    padding: 10px;
 }
-
 
 .fc-toolbar {
     background-color: #f3f4f6;
     border-radius: 8px;
     padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .fc-toolbar h2 {
     font-size: 18px;
+    margin: 5px 0;
 }
 
 .fc-button {
@@ -65,7 +70,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-fc-day-header {
+
+.fc-day-header {
     background-color: #f3f4f6;
     padding: 10px;
     border: none;
@@ -88,7 +94,7 @@ fc-day-header {
 
 .fc-today {
     background-color: #fff7e6 !important;
-} 
+}
 
 .fc-today .fc-day-number {
     background-color: #fff7e6 !important;
@@ -103,19 +109,18 @@ fc-day-header {
     border: none !important;
 }
 
-
 /* Ensure padding and margin are consistent */
 .fc .fc-head th {
     padding: 10px 0;
     margin: 0;
-    font-size: 14px; /* Adjust as necessary */
+    font-size: 14px;
     text-align: center;
 }
 
 .fc .fc-day-top {
     padding: 10px 0;
     margin: 0;
-    font-size: 14px; /* Adjust as necessary */
+    font-size: 14px;
     text-align: center;
 }
 
@@ -123,35 +128,114 @@ fc-day-header {
 .fc .fc-day {
     padding: 10px 0;
     margin: 0;
-    font-size: 14px; /* Adjust as necessary */
+    font-size: 14px;
     text-align: center;
     vertical-align: middle;
 }
 
 /* Event styling to ensure consistency */
 .fc-event {
-    background-color: #FFD700 !important; /* Adjust to match theme */
+    background-color: #9b8c39 !important;
     border: none !important;
-    color: #000 !important; /* Adjust text color */
-    font-size: 12px !important; /* Adjust font size */
-    text-align: center; /* Center the text */
-    white-space: normal !important; /* Allow text to wrap */
+    color: #000 !important; 
+    font-size: 15px !important; 
+    text-align: center; 
+    white-space: normal !important;
 }
 
 .fc-event .fc-title {
-    white-space: normal !important; /* Allow text to wrap */
+    white-space: normal !important;
 }
 
 /* Ensure the calendar structure is maintained */
 .fc .fc-day-grid-event {
-    margin: 1px 0 !important; /* Adjust margin to prevent layout issues */
-    padding: 2px 4px !important; /* Adjust padding for better appearance */
+    margin: 1px 0 !important;
+    padding: 2px 4px !important;
 }
 
 /* Ensure padding and margin are consistent */
 .fc .fc-head th, .fc .fc-day-top, .fc .fc-day {
     padding: 10px 0;
     margin: 0;
-    font-size: 14px; /* Adjust as necessary */
+    font-size: 14px;
     text-align: center;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 1200px) {
+    .fc-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .fc-toolbar h2 {
+        font-size: 16px;
+    }
+
+    .fc-button {
+        padding: 5px;
+        font-size: 14px;
+    }
+
+    .fc-day-number {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+    }
+
+    .fc-event {
+        font-size: 10px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .fc-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .fc-toolbar h2 {
+        font-size: 14px;
+    }
+
+    .fc-button {
+        padding: 5px;
+        font-size: 12px;
+    }
+
+    .fc-day-number {
+        width: 25px;
+        height: 25px;
+        line-height: 25px;
+    }
+
+    .fc-event {
+        font-size: 9px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .fc-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .fc-toolbar h2 {
+        font-size: 12px;
+    }
+
+    .fc-button {
+        padding: 3px;
+        font-size: 10px;
+    }
+
+    .fc-day-number {
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+    }
+
+    .fc-event {
+        font-size: 8px !important;
+    }
 }

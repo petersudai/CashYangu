@@ -1,9 +1,10 @@
 /* General Styles */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Montserrat', sans-serif !important; 
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    background-color: #f8f9fa;
     color: #333;
 }
 
@@ -17,7 +18,10 @@ ul {
     padding: 0;
     margin: 0;
 }
+.btn {
+    font-family: 'Montserrat', sans-serif !important; 
 
+}
 .header {
     display: flex;
     justify-content: space-between;
@@ -407,14 +411,6 @@ ul {
     margin: 0 auto;
 }
 
-/* General Styles */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f8f9fa;
-    color: #333;
-}
 
 /* Header Styles */
 .header {
@@ -427,7 +423,7 @@ body {
 }
 
 .header .logo img {
-    height: 40px;
+    height: 180px;
 }
 
 .header .navigation ul {
@@ -528,16 +524,16 @@ form button {
     margin-top: 50px;
 }
 
-
+/* Quote styles */
 .quote {
     font-family:'Courier New', Courier, monospace;
-    text-align: center !important; /* Center-align the text */
-    font-size: 11px !important; /* Adjust font size */
+    text-align: center !important; 
+    font-size: 11px !important; 
     padding-top: 20px;
-    padding: 20px !important; /* Equal padding on all sides */
-    margin: 0 auto !important; /* Center the element horizontally */
+    padding: 20px !important; 
+    margin: 0 auto !important; 
     margin-top: 30px !important;
-    display: table !important; /* Display as a table to center it horizontally */
+    display: table !important;
     background-color: #ffefb0;
     max-width: 600px !important;
     border-radius: 8px;
@@ -644,6 +640,8 @@ form button {
     justify-content: space-between;
     align-items: flex-start;
     margin: 20px 0;
+    flex-wrap: wrap;
+    flex: 1;
 }
 
 .content-column {
@@ -656,8 +654,9 @@ form button {
 }
 
 #calendar, #financialChart, #expenseCategoryChart {
-    max-width: 100%;
-    margin: 0 auto;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    flex-wrap: wrap !important;
 }
 
 .stat {
@@ -988,3 +987,6 @@ input:checked + .slider:before {
 .btn:hover {
     background-color: #f1cd00;
 }
+
+
+
