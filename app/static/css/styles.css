@@ -18,10 +18,14 @@ ul {
     padding: 0;
     margin: 0;
 }
-.btn {
-    font-family: 'Montserrat', sans-serif !important; 
-
+.btn, button {
+    font-family: 'Montserrat', sans-serif !important;
 }
+
+.btn2:hover {
+    background-color: #ffefb0;
+}
+
 .header {
     display: flex;
     justify-content: space-between;
