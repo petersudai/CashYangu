@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         const ctx = document.getElementById('expenseCategoryChart').getContext('2d');
         new Chart(ctx, {
-            type: 'pie',
+            type: 'doughnut',
             data: {
                 labels: Object.keys(data.expenseCategories),
                 datasets: [{
