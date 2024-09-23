@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // }
 
     function loadQuotesFromJSON() {
-        return fetch('static/quotes.json') // Replace with the actual path to your quotes.json file
+        return fetch('static/quotes.json')
             .then(response => response.json())
             .catch(error => {
                 console.error('Error loading quotes:', error);
@@ -178,9 +178,9 @@ document.addEventListener('DOMContentLoaded', function() {
         new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: ['Expenses', 'Savings'],
+                labels: ['Expenses', 'Earnings'],
                 datasets: [{
-                    data: [data.expenses, data.savings],
+                    data: [data.expenses, data.earnings],
                     backgroundColor: [
                         '#F7DCA7',
                         '#427D9D'
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     title: {
                         display: true,
-                        text: 'Expenses vs Savings',
+                        text: 'Expenses vs Earnings',
                         font: {
                             size: 18,
                             family: 'Montserrat',
