@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         const ctx = document.getElementById('financialChart').getContext('2d');
         new Chart(ctx, {
-            type: 'pie',
+            type: 'doughnut',
             data: {
                 labels: ['Expenses', 'Earnings'],
                 datasets: [{
