@@ -23,7 +23,7 @@ ul {
 }
 
 .btn2:hover {
-    background-color: #ffefb0;
+    background-color: #ffefb0 !important;
 }
 
 .header {
@@ -989,7 +989,7 @@ input:checked + .slider:before {
 }
 
 .btn:hover {
-    background-color: #f1cd00;
+    background-color: #f1cd00 !important;
 }
 
 
